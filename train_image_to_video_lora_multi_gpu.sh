@@ -3,6 +3,7 @@
 
 #  Run the script to start fine tune
 #  ./train_image_to_video_lora.sh
+
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
@@ -13,22 +14,24 @@ export NCCL_P2P_DISABLE=1
 export TORCH_NCCL_ENABLE_MONITORING=0
 export TOKENIZERS_PARALLELISM=false
 
-GPU_IDS="0"
+
+GPU_IDS="0,1,2"
 
 # Training Configurations
 # Experiment with as many hyperparameters as you want!
 LEARNING_RATES=("1e-4")
 LR_SCHEDULES=("cosine_with_restarts")
 OPTIMIZERS=("adam")
-MAX_TRAIN_STEPS=("100")
+MAX_TRAIN_STEPS=("1000")
 
 # Single GPU uncompiled training
-ACCELERATE_CONFIG_FILE="accelerate_configs/uncompiled_1.yaml"
+# ACCELERATE_CONFIG_FILE="accelerate_configs/uncompiled_1.yaml"
+ACCELERATE_CONFIG_FILE="accelerate_configs/uncompiled_1_multi_gpu.yaml"
 
 # Absolute path to where the data is located. Make sure to have read the README for how to prepare data.
 # This example assumes you downloaded an already prepared dataset from HF CLI as follows:
 #   huggingface-cli download --repo-type dataset Wild-Heart/Disney-VideoGeneration-Dataset --local-dir /path/to/my/datasets/disney-dataset
-DATA_ROOT="/workspace/input_videos"
+DATA_ROOT="/workspace/cogvideox/Image_to_Video_Generation/input_videos"
 CAPTION_COLUMN="prompt.txt"
 VIDEO_COLUMN="videos.txt"
 
@@ -51,7 +54,7 @@ for learning_rate in "${LEARNING_RATES[@]}"; do
           --dataloader_num_workers 8 \
           --pin_memory \
           --validation_prompt \"One man and one girl standing outside close to each other. Then they hugging each other. They appear to be happy and enjoying their time together.\" \
-          --validation_images \"/workspace/images/hugg__.jpg\"
+          --validation_images \"/workspace/cogvideox/Image_to_Video_Generation/images/hugg__.jpg\"
           --validation_prompt_separator ::: \
           --num_validation_videos 1 \
           --validation_epochs 10 \
